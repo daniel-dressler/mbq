@@ -3,12 +3,12 @@
 
 #include "mbq.h"
 
-void run_test(char *test_title, void (*test_body)())
+void run_test(char *test_title, struct mbq_accounting (*test_body)())
 {
 	struct timeval start_time;
 	gettimeofday(&start_time, NULL);
 
-	test_body();
+	struct mbq_accounting tag = test_body();
 
 	struct timeval end_time;
 	gettimeofday(&end_time, NULL);
@@ -19,17 +19,19 @@ void run_test(char *test_title, void (*test_body)())
 
 	printf("%ld, %s\n", 
 			taken_time.tv_sec * 1000 * 1000 + taken_time.tv_usec, test_title);
+	mbq_destroy(&tag);
 	return;
 
 }
 
+#define TEST(x) struct mbq_accounting x()
 #define LARGENUM (1000 * 1000 * 1000)
 #define MBQ_INTS \
 	struct mbq_accounting ints_tag; \
 	int *ints = mbq_init(&ints_tag, sizeof(*ints), LARGENUM);
 
 
-void test_write()
+TEST(test_write)
 {
 	MBQ_INTS;
 
@@ -38,9 +40,10 @@ void test_write()
 	while (len--) {
 		*ints_iter++ = len;
 	}
+	return ints_tag;
 }
 
-void test_write_read()
+TEST(test_write_read)
 {
 	MBQ_INTS;
 
@@ -57,9 +60,10 @@ void test_write_read()
 		sum += *ints_iter++;
 	}
 	fprintf(stderr, "Sum of writen = %lld\n", sum);
+	return ints_tag;
 }
 
-void test_write_wipe_read()
+TEST(test_write_wipe_read)
 {
 	MBQ_INTS;
 
@@ -81,9 +85,10 @@ void test_write_wipe_read()
 		sum += *ints_iter++;
 	}
 	fprintf(stderr, "Sum of wiped = %lld\n", sum);
+	return ints_tag;
 }
 
-void test_read()
+TEST(test_read)
 {
 	MBQ_INTS;
 
@@ -94,17 +99,20 @@ void test_read()
 		sum += *ints_iter++;
 	}
 	fprintf(stderr, "Sum of empty = %lld\n", sum);
+	return ints_tag;
 }
 
-void test_alloc()
+TEST(test_alloc)
 {
 	MBQ_INTS;
+	return ints_tag;
 }
 
-void test_alloc_wipe()
+TEST(test_alloc_wipe)
 {
 	MBQ_INTS;
 	mbq_wipe_pages(&ints_tag, ints_tag.begin_index, ints_tag.size);
+	return ints_tag;
 }
 
 int main(void)

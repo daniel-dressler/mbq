@@ -12,6 +12,7 @@ struct mbq_accounting {
 };
 
 void *mbq_init(struct mbq_accounting *accounts, size_t item_size, size_t item_count);
+void mbq_destroy(struct mbq_accounting *accounts);
 void *mbq_expand(struct mbq_accounting *accounts, size_t extra_item_capacity);
 size_t mbq_wipe_pages(struct mbq_accounting *accounts, size_t start_index, size_t dead_items);
 void mbq_delete_head(struct mbq_accounting *accounts, size_t items_to_delete);

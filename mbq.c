@@ -40,6 +40,12 @@ void *mbq_init(struct mbq_accounting *accounts, size_t item_size, size_t item_co
 	return mapped_array;
 }
 
+void mbq_destroy(struct mbq_accounting *accounts)
+{
+	munmap(accounts->array, accounts->item_size *
+	                        (accounts->stale_item_count + accounts->size));
+}
+
 void *mbq_expand(struct mbq_accounting *accounts, size_t extra_item_capacity)
 {
 	assert(MBQ_PAGESIZE != 0);
@@ -130,5 +136,4 @@ void mbq_delete_head(struct mbq_accounting *accounts, size_t items_to_delete)
 	accounts->begin_index += items_to_del;
 	return;
 }
-
 
