@@ -59,6 +59,30 @@ void test_write_read()
 	fprintf(stderr, "Sum of writen = %lld\n", sum);
 }
 
+void test_write_wipe_read()
+{
+	MBQ_INTS;
+
+	// Write
+	int *ints_iter = mbq_get_first_item((&ints_tag), ints);
+	size_t len = ints_tag.size;
+	while (len--) {
+		*ints_iter++ = len;
+	}
+
+	// Wipe
+	mbq_drop_pages(&ints_tag, ints_tag.begin_index, ints_tag.size);
+
+	// Read
+	ints_iter = mbq_get_first_item((&ints_tag), ints);
+	len = ints_tag.size;
+	long long sum = 0;
+	while (len--) {
+		sum += *ints_iter++;
+	}
+	fprintf(stderr, "Sum of wiped = %lld\n", sum);
+}
+
 void test_read()
 {
 	MBQ_INTS;
@@ -77,11 +101,19 @@ void test_alloc()
 	MBQ_INTS;
 }
 
+void test_alloc_wipe()
+{
+	MBQ_INTS;
+	mbq_drop_pages(&ints_tag, ints_tag.begin_index, ints_tag.size);
+}
+
 int main(void)
 {
 	puts("Time elapsed in microseconds, Test title");
-	run_test("Write", &test_write);
-	run_test("Write then read", &test_write_read);
-	run_test("Read", &test_read);
 	run_test("Aloc", &test_alloc);
+	run_test("Aloc then Wipe", &test_alloc_wipe);
+	run_test("Read", &test_read);
+	run_test("Write then Read", &test_write_read);
+	run_test("Write, Wipe, Read", &test_write_wipe_read);
+	run_test("Write", &test_write);
 }
