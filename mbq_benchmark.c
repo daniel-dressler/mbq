@@ -71,7 +71,7 @@ void test_write_wipe_read()
 	}
 
 	// Wipe
-	mbq_drop_pages(&ints_tag, ints_tag.begin_index, ints_tag.size);
+	mbq_wipe_pages(&ints_tag, ints_tag.begin_index, ints_tag.size);
 
 	// Read
 	ints_iter = mbq_get_first_item((&ints_tag), ints);
@@ -104,7 +104,7 @@ void test_alloc()
 void test_alloc_wipe()
 {
 	MBQ_INTS;
-	mbq_drop_pages(&ints_tag, ints_tag.begin_index, ints_tag.size);
+	mbq_wipe_pages(&ints_tag, ints_tag.begin_index, ints_tag.size);
 }
 
 int main(void)

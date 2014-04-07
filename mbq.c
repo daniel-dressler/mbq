@@ -60,7 +60,7 @@ void *mbq_expand(struct mbq_accounting *accounts, size_t extra_item_capacity)
 	return new_map;
 }
 
-size_t mbq_drop_pages(struct mbq_accounting *accounts, size_t start_index, size_t dead_items)
+size_t mbq_wipe_pages(struct mbq_accounting *accounts, size_t start_index, size_t dead_items)
 {
 	assert(MBQ_PAGESIZE != 0);
 
