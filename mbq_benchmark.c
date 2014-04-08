@@ -19,13 +19,15 @@ void run_test(char *test_title, struct mbq_accounting (*test_body)())
 
 	printf("%ld, %s\n", 
 			taken_time.tv_sec * 1000 * 1000 + taken_time.tv_usec, test_title);
+
+	// Do not count delete time against test
 	mbq_destroy(&tag);
 	return;
 
 }
 
 #define TEST(x) struct mbq_accounting x()
-#define LARGENUM (1000 * 1000)
+#define LARGENUM (100 * 1000 * 1000)
 #define test_type long long
 #define MBQ_INTS \
 	struct mbq_accounting tag; \
@@ -48,7 +50,7 @@ TEST(test_write_read)
 {
 	MBQ_INTS;
 
-	volatile test_type *iter = mbq_get_first_item((&tag), array);
+	test_type *iter = mbq_get_first_item((&tag), array);
 	size_t len = tag.size;
 	while (len--) {
 		*iter++ = len;
