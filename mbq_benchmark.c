@@ -25,42 +25,43 @@ void run_test(char *test_title, struct mbq_accounting (*test_body)())
 }
 
 #define TEST(x) struct mbq_accounting x()
-#define LARGENUM (1000 * 1000 * 1000)
+#define LARGENUM (100 * 1000 * 1000)
+#define test_type long long
 #define MBQ_INTS \
-	struct mbq_accounting ints_tag; \
-	int *ints = mbq_init(&ints_tag, sizeof(*ints), LARGENUM);
+	struct mbq_accounting tag; \
+	test_type *array = mbq_init(&tag, sizeof(*array), LARGENUM);
 
 
 TEST(test_write)
 {
 	MBQ_INTS;
 
-	volatile int *ints_iter = mbq_get_first_item((&ints_tag), ints);
-	size_t len = ints_tag.size;
+	volatile test_type *iter = mbq_get_first_item((&tag), array);
+	size_t len = tag.size;
 	while (len--) {
-		*ints_iter++ = len;
+		*iter++ = len;
 	}
-	return ints_tag;
+	return tag;
 }
 
 TEST(test_write_read)
 {
 	MBQ_INTS;
 
-	int *ints_iter = mbq_get_first_item((&ints_tag), ints);
-	size_t len = ints_tag.size;
+	volatile test_type *iter = mbq_get_first_item((&tag), array);
+	size_t len = tag.size;
 	while (len--) {
-		*ints_iter++ = len;
+		*iter++ = len;
 	}
 
-	ints_iter = mbq_get_first_item((&ints_tag), ints);
-	len = ints_tag.size;
+	iter = mbq_get_first_item((&tag), array);
+	len = tag.size;
 	long long sum = 0;
 	while (len--) {
-		sum += *ints_iter++;
+		sum += *iter++;
 	}
 	fprintf(stderr, "Sum of writen = %lld\n", sum);
-	return ints_tag;
+	return tag;
 }
 
 TEST(test_write_wipe_read)
@@ -68,51 +69,51 @@ TEST(test_write_wipe_read)
 	MBQ_INTS;
 
 	// Write
-	int *ints_iter = mbq_get_first_item((&ints_tag), ints);
-	size_t len = ints_tag.size;
+	volatile test_type *iter = mbq_get_first_item((&tag), array);
+	size_t len = tag.size;
 	while (len--) {
-		*ints_iter++ = len;
+		*iter++ = len;
 	}
 
 	// Wipe
-	mbq_wipe_pages(&ints_tag, ints_tag.begin_index, ints_tag.size);
+	mbq_wipe_pages(&tag, tag.begin_index, tag.size);
 
 	// Read
-	ints_iter = mbq_get_first_item((&ints_tag), ints);
-	len = ints_tag.size;
+	iter = mbq_get_first_item((&tag), array);
+	len = tag.size;
 	long long sum = 0;
 	while (len--) {
-		sum += *ints_iter++;
+		sum += *iter++;
 	}
 	fprintf(stderr, "Sum of wiped = %lld\n", sum);
-	return ints_tag;
+	return tag;
 }
 
 TEST(test_read)
 {
 	MBQ_INTS;
 
-	int *ints_iter = mbq_get_first_item((&ints_tag), ints);
-	size_t len = ints_tag.size;
+	volatile test_type *iter = mbq_get_first_item((&tag), array);
+	size_t len = tag.size;
 	long long sum = 0;
 	while (len--) {
-		sum += *ints_iter++;
+		sum += *iter++;
 	}
 	fprintf(stderr, "Sum of empty = %lld\n", sum);
-	return ints_tag;
+	return tag;
 }
 
 TEST(test_alloc)
 {
 	MBQ_INTS;
-	return ints_tag;
+	return tag;
 }
 
 TEST(test_alloc_wipe)
 {
 	MBQ_INTS;
-	mbq_wipe_pages(&ints_tag, ints_tag.begin_index, ints_tag.size);
-	return ints_tag;
+	mbq_wipe_pages(&tag, tag.begin_index, tag.size);
+	return tag;
 }
 
 int main(void)
