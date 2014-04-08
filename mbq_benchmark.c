@@ -25,7 +25,7 @@ void run_test(char *test_title, struct mbq_accounting (*test_body)())
 }
 
 #define TEST(x) struct mbq_accounting x()
-#define LARGENUM (100 * 1000 * 1000)
+#define LARGENUM (1000 * 1000)
 #define test_type long long
 #define MBQ_INTS \
 	struct mbq_accounting tag; \
@@ -54,11 +54,13 @@ TEST(test_write_read)
 		*iter++ = len;
 	}
 
-	iter = mbq_get_first_item((&tag), array);
-	len = tag.size;
 	long long sum = 0;
-	while (len--) {
-		sum += *iter++;
+	for (int i = 0; i < 100; i++) {
+		iter = mbq_get_first_item((&tag), array);
+		len = tag.size;
+		while (len--) {
+			sum += *iter++;
+		}
 	}
 	fprintf(stderr, "Sum of writen = %lld\n", sum);
 	return tag;
